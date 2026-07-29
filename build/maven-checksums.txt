@@ -1,0 +1,15 @@
+# SHA-256 pins for every Maven artifact this repository resolves.
+#
+# Verified by the VerifySfmcMavenArtifactHashes target in src/Sfmc.Binding.props on every
+# build, on both resolution paths - @(AndroidMavenLibrary) and the direct-download fallback.
+# Regenerate with build/UpdateMavenChecksums.sh after a version bump; a hash that changes for
+# an UNCHANGED version is the tampering event these pins exist to catch.
+#
+# <file name> <sha256>
+marketingcloudsdk-11.0.1.aar 7e55be479a9006c4c08a207b222c96637b26fd19186b48b8f175bc31731d1783
+pushfeaturemodule-2.0.1.aar 1d34a2eb14501908ad5305ee8083f6a1fbacb268d539c4da3a5abedc456e24f8
+pushmodelsmodule-1.0.3.aar 71f27a0cf604e8d4b6a702f657b399d533d835d89cbdf088481e08eef4c45092
+inappmessagingfeaturemodule-1.0.1.aar 46866d4a60148a1f9ad96a6151af1f44693f0e04b6403481abdf259e1a170815
+inappmessagingmodelsmodule-1.0.1.aar 78d4bf1dcb86423fb3eea3b44497fb591ad90002bb34165c9581a9d9c3b30131
+common-1.0.1.aar cb99a0e277c5f283170fe4cd073b207e3eaeea008a17a166e4a576a8fbf465a8
+legacy-crypto-1.0.3.aar c7f19718f513eeef98ef7bbde22801f4198be0169031a05196eaee64ca638a9c

@@ -1,0 +1,93 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <SfmcArtifact>marketingcloudsdk</SfmcArtifact>
+    <SfmcArtifactVersion>$(SfmcNativeVersion)</SfmcArtifactVersion>
+    <SfmcPackageId>MarketingCloudSDK.Net.Android</SfmcPackageId>
+    <!-- The umbrella and pushfeaturemodule import Google-hosted BOMs; see Sfmc.Binding.props. -->
+    <SfmcResolveArtifactsDirectly>true</SfmcResolveArtifactsDirectly>
+    <Description>.NET for Android bindings for the Salesforce Marketing Cloud MobilePush module (com.salesforce.marketingcloud:marketingcloudsdk) - push registration, inbox, in-app messages, geofence and beacon messaging - plus the modular feature .aars of the Unified SDK architecture. Successor to the sfmc-net-bindings-mobile packages, at the v11 generation.</Description>
+  </PropertyGroup>
+
+  <Import Project="../Sfmc.Binding.props" />
+
+  <!--
+    The modular .aars the umbrella .pom declares, all riding in THIS package. Bound where public
+    API lives (the v10+ modularization moved real surface - notification customization, in-app
+    message models - out of the umbrella into the feature modules); payload-only (Bind defaults
+    to false) where the classes are wiring the bound tiers reach from Kotlin.
+
+    NOT here: sfmcsdk and common-internal, which arrive through the SFMCSDK.Net.Android package
+    reference below - two packages shipping the same classes would fail the consuming app's
+    build with duplicate-class errors (XA4301).
+  -->
+  <ItemGroup>
+    <!--
+      Decided empirically rather than assumed. The MODELS modules are bound: the umbrella's own
+      public listeners take their types (MessageAnalyticEventListener's NotificationMessage,
+      InAppMessageEventListener's InAppMessage), and an unbound parameter type makes the
+      generator drop the method - which then breaks every CONSUMER's build, because the Java
+      Callable Wrapper for the listener no longer overrides an abstract Java method (JAVAC0000).
+      The FEATURE modules stay payload-only: their com.salesforce.marketingcloud.pushfeature /
+      .inappmessagingfeature internals trip a wall of generator failures for API nothing calls
+      from C#, and nothing public references their types. The rendering-data subpackages of the
+      models modules are excluded in Transforms/Metadata.xml for the same reason. The classes are
+      still dexed into the app either way.
+    -->
+    <SfmcMavenArtifact Include="com.salesforce.marketingcloud:pushfeaturemodule"
+                       Version="$(SfmcPushFeatureVersion)" />
+    <SfmcMavenArtifact Include="com.salesforce.marketingcloud:pushmodelsmodule"
+                       Version="$(SfmcPushModelsVersion)" Bind="true" />
+    <SfmcMavenArtifact Include="com.salesforce.marketingcloud:inappmessagingfeaturemodule"
+                       Version="$(SfmcInAppMessagingFeatureVersion)" />
+    <SfmcMavenArtifact Include="com.salesforce.marketingcloud:inappmessagingmodelsmodule"
+                       Version="$(SfmcInAppMessagingModelsVersion)" Bind="true" />
+    <SfmcMavenArtifact Include="com.salesforce.marketingcloud:common"
+                       Version="$(SfmcCommonVersion)" />
+    <SfmcMavenArtifact Include="com.salesforce.marketingcloud:legacy-crypto"
+                       Version="$(SfmcLegacyCryptoVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Deliberately a bare version, not the exact-range [x.y.z.r] the umbrella repositories use:
+      the .NET Android SDK's Java dependency verification neither walks ProjectReference items
+      nor parses bracketed ranges, so a bracketed pin here would fail the build with XA4241
+      demanding a package that is, in fact, referenced. The consequence - NuGet may resolve a
+      HIGHER SFMCSDK.Net.Android - is acceptable because that package's first three components
+      are the native sfmcsdk version, and verify-pom-deps.py fails CI when this pin's native line
+      stops matching what the marketingcloudsdk .pom demands.
+    -->
+    <PackageReference Include="SFMCSDK.Net.Android" Version="$(SfmcCorePackageVersion)" />
+  </ItemGroup>
+
+  <!--
+    The third-party Java types the MobilePush .aars link against, one .NET binding package per
+    .pom dependency this package introduces over the core's set. kotlin-stdlib comes from
+    Sfmc.Binding.props. Versions live in Directory.Build.props.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Xamarin.Firebase.Messaging" Version="$(FirebaseMessagingVersion)" />
+    <PackageReference Include="Xamarin.GooglePlayServices.Tasks" Version="$(GooglePlayServicesTasksVersion)" />
+    <PackageReference Include="Xamarin.GooglePlayServices.Base" Version="$(GooglePlayServicesBaseVersion)" />
+<!-- Split by head: 1.12.0 has no net8 asset. See Directory.Build.props for the reasoning. -->
+    <PackageReference Include="Xamarin.AndroidX.Activity" Version="$(AndroidXActivityVersion)"
+                      Condition=" '$(TargetFramework)' != 'net8.0-android34.0' " />
+    <PackageReference Include="Xamarin.AndroidX.Activity" Version="$(AndroidXActivityVersionNet8)"
+                      Condition=" '$(TargetFramework)' == 'net8.0-android34.0' " />
+    <PackageReference Include="Xamarin.AndroidX.Collection.Ktx" Version="$(AndroidXCollectionKtxVersion)" />
+    <PackageReference Include="Xamarin.AndroidX.Fragment.Ktx" Version="$(AndroidXFragmentKtxVersion)" />
+    <PackageReference Include="Xamarin.AndroidX.ConstraintLayout" Version="$(AndroidXConstraintLayoutVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      legacy-crypto's .pom asks for kotlin-stdlib-jdk8 1.7.20. Kotlin merged the jdk7/jdk8
+      extensions into the main stdlib at 1.8, so the classes it needs are inside the
+      kotlin-stdlib 2.2.21 every other module already requires - a separate (and today empty)
+      Jdk8 binding package would satisfy the letter of the .pom while adding nothing.
+    -->
+    <AndroidIgnoredJavaDependency Include="org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.20" />
+  </ItemGroup>
+
+</Project>

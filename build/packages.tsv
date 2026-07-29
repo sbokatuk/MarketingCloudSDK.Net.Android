@@ -1,0 +1,34 @@
+# The package set, and the single source of truth for it.
+#
+# BuildNugets.sh packs in this order, the release and PR workflows generate their package tables
+# from it, and run-emulator-tests.sh clears the local NuGet cache for every id listed here. Adding
+# a package means adding a row here and a project under src/ - nothing else has a second copy of
+# the list to fall out of step with.
+#
+# package-id	maven-artifact-id	deps (SFMC-family package ids it must declare, or -)
+MarketingCloudSDK.Net.Android	marketingcloudsdk	SFMCSDK.Net.Android
+
+# ----------------------------------------------------------------------------------------------
+# NOT BOUND, and why.
+#
+# Salesforce publishes these under com.salesforce.marketingcloud on its GitHub-Pages Maven
+# repository. This section doubles as the machine-read roster for the upstream-watch workflow -
+# keep every entry a FULL artifact id.
+#
+#   pushfeaturemodule            Shipped INSIDE MarketingCloudSDK.Net.Android: the umbrella .pom's
+#   pushmodelsmodule             modular artifacts. The feature/model modules are bound (public
+#   inappmessagingfeaturemodule  API lives there since the v10 modularization); common and
+#   inappmessagingmodelsmodule   legacy-crypto are payload-only wiring. Not missing; deliberately
+#   common                       not packages of their own.
+#   legacy-crypto
+#
+#   sfmcsdk                      The SFMC SDK core, bound by the sibling repository
+#   common-internal              SFMCSDK.Net.Android, which this package depends on - mirroring
+#                                how the native umbrella depends on sfmcsdk.
+#
+#   mobileappmessaging           Mobile App Messaging (MAM) - a separate, optional Salesforce
+#   mobileappmessagingsdk        product on its own version line, not a dependency of the
+#                                umbrella. A binding candidate once a consumer asks.
+#
+#   core                         2021-era leftovers of the pre-Unified architecture, last
+#   version-safety-plugin        published years before this repository existed. Dead upstream.

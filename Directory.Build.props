@@ -1,0 +1,102 @@
+<Project>
+
+  <PropertyGroup>
+    <!--
+      Package versions are <marketingcloudsdk version>.<binding revision>, e.g. 11.0.1.1.
+
+      The first three components are the native Salesforce MobilePush umbrella module
+      (com.salesforce.marketingcloud:marketingcloudsdk) inside the package, resolved from
+      Salesforce's own Maven repository. The fourth belongs to this repository and increments
+      whenever the bindings or packaging change while the native artifacts stay put.
+
+      SfmcNativeVersion, not McNativeVersion: the property names are deliberately uniform with
+      the sibling SFMCSDK.Net.Android repository, so src/Sfmc.Binding.props and the build scripts
+      stay a one-file port between the two.
+    -->
+    <SfmcNativeVersion>11.0.1</SfmcNativeVersion>
+    <SfmcBindingRevision>1</SfmcBindingRevision>
+    <VersionPrefix>$(SfmcNativeVersion).$(SfmcBindingRevision)</VersionPrefix>
+
+    <!--
+      The modular artifacts of the Unified SDK architecture, versioned independently upstream and
+      declared by the marketingcloudsdk .pom. Each rides inside this package as an .aar - see the
+      csproj for which are bound and which are payload-only. One property per artifact so a bump
+      is one edit plus a checksum regeneration; verify-pom-deps.py fails the build when any falls
+      out of step with the .pom.
+    -->
+    <SfmcPushFeatureVersion>2.0.1</SfmcPushFeatureVersion>
+    <SfmcPushModelsVersion>1.0.3</SfmcPushModelsVersion>
+    <SfmcInAppMessagingFeatureVersion>1.0.1</SfmcInAppMessagingFeatureVersion>
+    <SfmcInAppMessagingModelsVersion>1.0.1</SfmcInAppMessagingModelsVersion>
+    <SfmcCommonVersion>1.0.1</SfmcCommonVersion>
+    <SfmcLegacyCryptoVersion>1.0.3</SfmcLegacyCryptoVersion>
+
+    <!--
+      The SFMC SDK core the MobilePush module plugs into, taken as the sibling repository's NuGet
+      package - mirroring how the native umbrella depends on sfmcsdk. The package wraps sfmcsdk
+      3.1.1, which is exactly what the marketingcloudsdk 11.0.1 .pom demands; verify-pom-deps.py
+      checks that equivalence on every CI run.
+    -->
+    <SfmcCorePackageVersion>3.1.1.1</SfmcCorePackageVersion>
+  </PropertyGroup>
+
+  <!--
+    Versions of the third-party binding packages that supply the Java types the MobilePush .aars
+    link against, matching the marketingcloudsdk/pushfeaturemodule 11.0.1-generation .poms:
+
+      firebase-messaging (managed by firebase-bom 34.6.0), play-services-tasks 18.4.0,
+      play-services-base 18.9.0, androidx activity 1.12.0, collection(-ktx) 1.5.0,
+      fragment-ktx 1.8.9, constraintlayout 2.2.1, kotlin-stdlib 2.2.21 - plus, transitively
+      through SFMCSDK.Net.Android, the core set that .pom declares.
+
+    These are NOT the latest stable versions: each pin is the newest NuGet revision that still
+    carries a net8 asset AND wraps at least the native version the .pom demands - the same
+    AndroidX generation the sibling repository pins, because AndroidX must be internally
+    consistent or the consuming app fails to dex.
+  -->
+  <PropertyGroup>
+    <KotlinStdLibVersion>2.2.21</KotlinStdLibVersion>
+    <FirebaseMessagingVersion>125.0.1</FirebaseMessagingVersion>
+    <GooglePlayServicesTasksVersion>118.4.0</GooglePlayServicesTasksVersion>
+    <GooglePlayServicesBaseVersion>118.9.0</GooglePlayServicesBaseVersion>
+    <AndroidXActivityVersion>1.12.0</AndroidXActivityVersion>
+    <!--
+      Activity 1.12.0 - the version the .pom names - ships net9/net10 assets only, so the
+      net8.0-android34.0 head pins the last version that still carries a net8 asset. Same
+      reasoning as Lifecycle.Process in the sibling repository: the net9/net10 heads, where Java
+      dependency verification actually runs, carry the .pom-exact version.
+    -->
+    <AndroidXActivityVersionNet8>1.11.0</AndroidXActivityVersionNet8>
+    <!-- 1.5.0.3, not the .pom's bare 1.5.0: Fragment.Ktx 1.8.9 floors it there and NU1605 treats
+         the resulting downgrade as an error. Same native payload either way. -->
+    <AndroidXCollectionKtxVersion>1.5.0.3</AndroidXCollectionKtxVersion>
+    <AndroidXFragmentKtxVersion>1.8.9</AndroidXFragmentKtxVersion>
+    <AndroidXConstraintLayoutVersion>2.2.1</AndroidXConstraintLayoutVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>s.bokatuk</Authors>
+    <Company>s.bokatuk</Company>
+    <Copyright>Copyright © s.bokatuk</Copyright>
+    <PackageProjectUrl>https://github.com/sbokatuk/MarketingCloudSDK.Net.Android</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/sbokatuk/MarketingCloudSDK.Net.Android</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT AND BSD-3-Clause</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <ContinuousIntegrationBuild Condition=" '$(GITHUB_ACTIONS)' == 'true' ">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <SfmcReleaseNotesFile>$(MSBuildThisFileDirectory)docs/release-notes/$(VersionPrefix).md</SfmcReleaseNotesFile>
+    <PackageReleaseNotes Condition=" Exists('$(SfmcReleaseNotesFile)') ">$([System.IO.File]::ReadAllText('$(SfmcReleaseNotesFile)'))</PackageReleaseNotes>
+    <PackageReleaseNotes Condition=" '$(PackageReleaseNotes)' == '' ">https://github.com/sbokatuk/MarketingCloudSDK.Net.Android/releases/tag/v$(VersionPrefix)</PackageReleaseNotes>
+  </PropertyGroup>
+
+</Project>

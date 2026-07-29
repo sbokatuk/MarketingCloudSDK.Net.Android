@@ -1,0 +1,24 @@
+# What the upstream-drift workflow watches, and the single source of truth for it.
+#
+# build/check-upstream.sh reads this; it knows how to query each ecosystem but nothing about which
+# components this repository binds. Adding a native SDK means adding a row here.
+#
+# Columns are single-tab-separated.
+#   group    reporting group - one GitHub issue per group, titled with this text
+#   label    how the component is named inside the issue
+#   kind     cocoapods | maven | github-release | github-tag
+#   pin      the MSBuild property in Directory.Build.props holding the pinned version
+#   locator  kind-specific: pod name, groupId:artifactId[:packaging][@repo], or owner/repo
+#   confirm  download URL template with {version}, or "-" to derive it from the locator
+#
+# One row per module .aar this package ships: the modules version independently upstream, so a
+# drift in any of them is a repack even when marketingcloudsdk itself has not moved.
+#
+# group	label	kind	pin	locator	confirm
+MobilePush Android	marketingcloudsdk	maven	SfmcNativeVersion	com.salesforce.marketingcloud:marketingcloudsdk:aar@https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/repository	-
+MobilePush Android	pushfeaturemodule	maven	SfmcPushFeatureVersion	com.salesforce.marketingcloud:pushfeaturemodule:aar@https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/repository	-
+MobilePush Android	pushmodelsmodule	maven	SfmcPushModelsVersion	com.salesforce.marketingcloud:pushmodelsmodule:aar@https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/repository	-
+MobilePush Android	inappmessagingfeaturemodule	maven	SfmcInAppMessagingFeatureVersion	com.salesforce.marketingcloud:inappmessagingfeaturemodule:aar@https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/repository	-
+MobilePush Android	inappmessagingmodelsmodule	maven	SfmcInAppMessagingModelsVersion	com.salesforce.marketingcloud:inappmessagingmodelsmodule:aar@https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/repository	-
+MobilePush Android	common	maven	SfmcCommonVersion	com.salesforce.marketingcloud:common:aar@https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/repository	-
+MobilePush Android	legacy-crypto	maven	SfmcLegacyCryptoVersion	com.salesforce.marketingcloud:legacy-crypto:aar@https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/repository	-

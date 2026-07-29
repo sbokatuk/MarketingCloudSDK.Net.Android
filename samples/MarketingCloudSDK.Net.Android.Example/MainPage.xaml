@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MarketingCloudSDK.Net.Android.Example.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24,16" Spacing="12">
+
+            <Label Text="MarketingCloudSDK.Net.Android"
+                   FontSize="24" FontAttributes="Bold"
+                   SemanticProperties.HeadingLevel="Level1" />
+            <Label Text="Drives the raw MobilePush binding. Enter your own MobilePush app credentials - nothing is baked in, nothing is stored. Push delivery additionally needs google-services.json and the POST_NOTIFICATIONS permission; without them initialization still succeeds and the token stays empty."
+                   FontSize="13" />
+
+            <Entry x:Name="AppIdEntry" Placeholder="Application id" />
+            <Entry x:Name="AccessTokenEntry" Placeholder="Access token" />
+            <Entry x:Name="ServerUrlEntry" Placeholder="Tenant endpoint URL (https://...marketingcloudapis.com/)" />
+            <Entry x:Name="MidEntry" Placeholder="MID" Keyboard="Numeric" />
+
+            <Button x:Name="InitializeButton"
+                    Text="Initialize the SDK"
+                    Clicked="OnInitializeClicked" />
+
+            <Label x:Name="StatusLabel" Text="Not initialized." FontAttributes="Bold" />
+
+            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" />
+
+            <Entry x:Name="ContactKeyEntry"
+                   Placeholder="Registration tag"
+                   IsEnabled="False" />
+            <Button x:Name="ContactKeyButton"
+                    Text="Add registration tag"
+                    IsEnabled="False"
+                    Clicked="OnAddTagClicked" />
+
+            <Button x:Name="TokenButton"
+                    Text="Show registration and push token"
+                    IsEnabled="False"
+                    Clicked="OnShowRegistrationClicked" />
+
+            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" />
+
+            <Label Text="Log" FontAttributes="Bold" />
+            <Label x:Name="LogLabel" FontSize="12" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

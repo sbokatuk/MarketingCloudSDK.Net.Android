@@ -1,0 +1,109 @@
+<metadata>
+  <!--
+    Rules are the exceptions, not the norm: the generator handles the rest of the surface
+    unaided. Every rule states what breaks without it, so an upgrade can re-check whether the
+    upstream shape that motivated it still exists - an XPath that stops matching is silent.
+
+    Carried over from the pre-rebuild sfmc-net-bindings-mobile repository (which bound the 8.x
+    generation) and re-validated against 11.0.1. Dropped from the old set because the v10
+    modularization removed the shape that motivated them: InboxMessage's '-deleted' accessor.
+  -->
+
+  <!--
+    Kotlin data classes implement android.os.Parcelable with a nested CREATOR whose
+    createFromParcel/newArray return the concrete type; C# cannot implement
+    IParcelableCreator's Object-typed members with covariant returns, so every one of them fails
+    CS0738 (55 such classes in the 11.0.1 .aars). Parcelable creators are called by the OS
+    through reflection, never from C#, so nothing user-facing is lost by not binding them - one
+    semantic rule instead of fifty-five brittle ones.
+  -->
+  <remove-node path="//class[implements[@name='android.os.Parcelable.Creator']]" />
+
+  <!--
+    MessageAnalyticEventListener declares two recordPushMessageReceived overloads. The
+    generator's listener-to-event projection derives the Implementor's Handler member from the
+    method name alone, so the overloads collide (CS0102). Renaming the raw-payload overload
+    keeps both reachable; eventName alone does not rename the Handler member.
+  -->
+  <attr path="/api/package[@name='com.salesforce.marketingcloud.analytics']/interface[@name='MessageAnalyticEventListener']/method[@name='recordPushMessageReceived' and count(parameter)=1]" name="managedName">RecordPushMessagePayloadReceived</attr>
+  <!-- Implementations must follow the interface rename member-for-member (CS0535 otherwise). -->
+  <attr path="/api/package[@name='com.salesforce.marketingcloud.analytics']/class[@name='MarketingCloudAnalyticEventListener']/method[@name='recordPushMessageReceived' and count(parameter)=1]" name="managedName">RecordPushMessagePayloadReceived</attr>
+
+  <!--
+    Salesforce-internal plumbing (@RestrictTo LIBRARY, visible in the .aar's class files as
+    annotated-visibility="LIBRARY") that implements generic Kotlin callbacks whose erasure the
+    generator cannot reconcile (CS0535 on IEventCallback.OnEventPublished). Nothing user-facing:
+    the class exists for the SDK's own wiring and stays in the dexed .aar.
+  -->
+  <remove-node path="/api/package[@name='com.salesforce.marketingcloud.analytics']/class[@name='InternalAnalyticManager']" />
+
+  <!--
+    The com.salesforce.marketingcloud.push.* packages are the v11 rich-push template rendering
+    machinery (templates, carousels, styles, buttons) - new internals the 8.x binding never had,
+    reached by the SDK's own Kotlin renderers, and full of shapes the generator cannot project
+    (covariant Parcelable models, interface default-impl classes, a getType() colliding with
+    System.Object.GetType). The public notification surface consumers customize through is
+    com.salesforce.marketingcloud.notifications, which stays fully bound; the push.* classes stay
+    dexed in the .aar for the SDK's own use.
+  -->
+  <remove-node path="/api/package[@name='com.salesforce.marketingcloud.push']" />
+  <remove-node path="/api/package[starts-with(@name,'com.salesforce.marketingcloud.push.')]" />
+  <!--
+    The same rendering-internals reasoning for the models modules' template-data subpackages -
+    Style/Template/Text and friends, whose covariant shapes fail the generator identically. The
+    top-level pushmodels/inappmessaging model types (NotificationMessage, InAppMessage - the DTOs
+    the umbrella's public listeners take) stay bound; only the rendering data moves out of the
+    projection. The trailing-dot variants deliberately do NOT match the parent packages.
+  -->
+  <remove-node path="/api/package[@name='com.salesforce.marketingcloud.pushmodels.data']" />
+  <remove-node path="/api/package[starts-with(@name,'com.salesforce.marketingcloud.pushmodels.data.')]" />
+
+  <!--
+    Salesforce-internal precondition helpers whose generic overloads (T extends CharSequence /
+    C extends Collection) erase to identical C# signatures (CS0111). Never called from C#.
+  -->
+  <remove-node path="/api/package[@name='com.salesforce.marketingcloud.util']/class[@name='Preconditions']" />
+
+  <!--
+    InboxMessage carries a String field literally named 'inboxMessage' (the raw payload), which
+    property-ifies to a member named like its enclosing type (CS0542).
+  -->
+  <attr path="/api/package[@name='com.salesforce.marketingcloud.messages.inbox']/class[@name='InboxMessage']/field[@name='inboxMessage']" name="managedName">InboxMessageJson</attr>
+
+  <!--
+    ProximityManager declares BOTH the MCComponent interface method componentState() and a
+    Kotlin val accessor getComponentState(); the accessor property-ifies to a ComponentState
+    property that hides the abstract method inherited from MCInternalComponent (CS0533). Kept as
+    a plain GetComponentState() method instead.
+  -->
+  <attr path="/api/package[@name='com.salesforce.marketingcloud.proximity']/class[@name='ProximityManager']/method[@name='getComponentState' and count(parameter)=0]" name="propertyName"></attr>
+
+  <!--
+    Kotlin mangles the deprecated refreshCenter/refreshRadius accessors into names with a
+    '-deprecated_' prefix, which the generator cannot use. GetRefreshCenter/GetRefreshRadius is
+    what the 8.x binding called them; kept so migrating consumers keep compiling.
+  -->
+  <attr path="/api/package[@name='com.salesforce.marketingcloud.messages.geofence']/class[@name='GeofenceMessageResponse']/method[@name='-deprecated_refreshCenter' and count(parameter)=0]" name="managedName">GetRefreshCenter</attr>
+  <attr path="/api/package[@name='com.salesforce.marketingcloud.messages.geofence']/class[@name='GeofenceMessageResponse']/method[@name='-deprecated_refreshRadius' and count(parameter)=0]" name="managedName">GetRefreshRadius</attr>
+  <attr path="/api/package[@name='com.salesforce.marketingcloud.messages.proximity']/class[@name='ProximityMessageResponse']/method[@name='-deprecated_refreshCenter' and count(parameter)=0]" name="managedName">GetRefreshCenter</attr>
+  <attr path="/api/package[@name='com.salesforce.marketingcloud.messages.proximity']/class[@name='ProximityMessageResponse']/method[@name='-deprecated_refreshRadius' and count(parameter)=0]" name="managedName">GetRefreshRadius</attr>
+
+  <!--
+    Region implements Comparable<Region>; the generated strongly-typed CompareTo collides with
+    the IComparable bridge method. Forcing the parameter's managed type to Java.Lang.Object makes
+    the one method serve as the interface implementation - what the 8.x binding shipped.
+  -->
+  <attr path="/api/package[@name='com.salesforce.marketingcloud.messages']/class[@name='Region']/method[@name='compareTo' and count(parameter)=1 and parameter[1][@type='com.salesforce.marketingcloud.messages.Region']]" name="managedName">CompareTo</attr>
+  <attr path="/api/package[@name='com.salesforce.marketingcloud.messages']/class[@name='Region']/method[@name='compareTo' and count(parameter)=1 and parameter[1][@type='com.salesforce.marketingcloud.messages.Region']]/parameter[1]" name="managedType">Java.Lang.Object</attr>
+  <!-- The pushmodels module has its own Comparable Region with the identical shape. -->
+  <attr path="/api/package[@name='com.salesforce.marketingcloud.pushmodels']/class[@name='Region']/method[@name='compareTo' and count(parameter)=1 and parameter[1][@type='com.salesforce.marketingcloud.pushmodels.Region']]" name="managedName">CompareTo</attr>
+  <attr path="/api/package[@name='com.salesforce.marketingcloud.pushmodels']/class[@name='Region']/method[@name='compareTo' and count(parameter)=1 and parameter[1][@type='com.salesforce.marketingcloud.pushmodels.Region']]/parameter[1]" name="managedType">Java.Lang.Object</attr>
+
+  <!--
+    InAppMessageComponent's setStatusBarColor/setTypeface are setter-only and the generator's
+    property-ification produces write-only properties that fail the build; kept as plain methods,
+    as the 8.x binding shipped them.
+  -->
+  <attr path="/api/package[@name='com.salesforce.marketingcloud.messages.iam']/class[@name='InAppMessageComponent']/method[@name='setStatusBarColor' and count(parameter)=1 and parameter[1][@type='int']]" name="propertyName"></attr>
+  <attr path="/api/package[@name='com.salesforce.marketingcloud.messages.iam']/class[@name='InAppMessageComponent']/method[@name='setTypeface' and count(parameter)=1 and parameter[1][@type='android.graphics.Typeface']]" name="propertyName"></attr>
+</metadata>
