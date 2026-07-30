@@ -58,7 +58,7 @@ The SFMC SDK core (`SFMCSDK.Net.Android`) arrives as a dependency of this packag
 | --- | --- | --- | --- |
 | `MarketingCloudSDK.Net.Android` | `marketingcloudsdk` 11.0.1 + 6 module `.aar`s | `SFMCSDK.Net.Android`, `Xamarin.Firebase.Messaging`, Play services, AndroidX | Push registration, inbox, in-app messages, geofence/beacon messaging |
 
-Versions are `<marketingcloudsdk version>.<binding revision>` — `11.0.1.2` is marketingcloudsdk 11.0.1, binding revision 2.
+Versions are `<marketingcloudsdk version>.<binding revision>` — for example, `11.0.1.2` means marketingcloudsdk 11.0.1, binding revision 2.
 
 ## What is bound
 
