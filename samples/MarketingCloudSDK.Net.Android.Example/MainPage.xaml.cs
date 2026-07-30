@@ -1,4 +1,5 @@
 using Com.Salesforce.Marketingcloud;
+using Com.Salesforce.Marketingcloud.Sfmcsdk;
 
 namespace MarketingCloudSDK.Net.Android.Example;
 
@@ -39,9 +40,17 @@ public partial class MainPage : ContentPage
             .SetMid(mid)
             .Build(context);
 
-        // The Action overload is this package's addition - natively Init takes a listener
-        // interface that needs a Java.Lang.Object subclass.
-        MarketingCloudSdk.Init(context, config, status =>
+        // Configure the container, not the module: MarketingCloudConfig is an
+        // EngagementModuleConfig, and SFMCSdk.Configure is what supplies the module the components
+        // it initializes with. MarketingCloudSdk.Init, the pre-Unified-SDK entry point, hands the
+        // module a null SFMCSdkComponents and dies in getEncryptionManager - RequestSdk below
+        // would then never fire. The Action overload is the binding's, not the listener interface.
+        var modules = new SFMCSdkModuleConfig.Builder
+        {
+            EngagementModuleConfig = config,
+        }.Build();
+
+        SFMCSdk.Configure(context, modules, status =>
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {

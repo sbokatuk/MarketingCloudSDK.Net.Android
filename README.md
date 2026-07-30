@@ -58,7 +58,7 @@ The SFMC SDK core (`SFMCSDK.Net.Android`) arrives as a dependency of this packag
 | --- | --- | --- | --- |
 | `MarketingCloudSDK.Net.Android` | `marketingcloudsdk` 11.0.1 + 6 module `.aar`s | `SFMCSDK.Net.Android`, `Xamarin.Firebase.Messaging`, Play services, AndroidX | Push registration, inbox, in-app messages, geofence/beacon messaging |
 
-Versions are `<marketingcloudsdk version>.<binding revision>` — `11.0.1.1` is marketingcloudsdk 11.0.1, binding revision 1.
+Versions are `<marketingcloudsdk version>.<binding revision>` — for example, `11.0.1.2` means marketingcloudsdk 11.0.1, binding revision 2.
 
 ## What is bound
 
@@ -74,7 +74,7 @@ The full roster with reasons lives in [build/packages.tsv](build/packages.tsv); 
 ## Installing
 
 ```xml
-<PackageReference Include="MarketingCloudSDK.Net.Android" Version="11.0.1.1" />
+<PackageReference Include="MarketingCloudSDK.Net.Android" Version="11.0.1.2" />
 ```
 
 Target frameworks: `net8.0-android34.0`, `net9.0-android35.0`, `net10.0-android36.0`. The SFMC SDK's own floor is **Android 8.0 (API 26)**.
@@ -119,8 +119,8 @@ The device tests and sample restore `SFMCSDK.Net.Android` from nuget.org (or fro
 
 ```sh
 dotnet test tests/MarketingCloudSDK.Net.Android.PackageTests
-./.github/scripts/run-emulator-tests.sh 11.0.1.1 net9.0-android35.0        # needs a running emulator
-./.github/scripts/run-emulator-tests.sh 11.0.1.1 net9.0-android35.0 r8    # the shrunk leg
+./.github/scripts/run-emulator-tests.sh 11.0.1.2 net9.0-android35.0        # needs a running emulator
+./.github/scripts/run-emulator-tests.sh 11.0.1.2 net9.0-android35.0 r8    # the shrunk leg
 ```
 
 The device tests run without credentials on purpose: they prove the native classes across all seven `.aar`s are present, the JNI surface works and configuration reaches the SDK — not that a tenant accepts the traffic.
