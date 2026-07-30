@@ -4,11 +4,10 @@
 # stale silently on every release. Running this in CI makes the version bump before a release
 # drag the README along with it.
 #
-# What is checked: every <PackageReference Include="...SDK.Net..." Version="..."> pin - this
-# repository's own package id and the sibling SFMC ones alike - and the device-check example
-# (run-emulator-tests.sh <version> ...). Prose that explains the version *scheme* ("3.1.1.1 is
-# sfmcsdk 3.1.1, binding revision 1") is deliberately not checked - it describes the format, not
-# the current release.
+# What is checked: the README's PackageReference pin(s) for this repository's package id
+# (MarketingCloudSDK.Net.Android) and the device-check example (run-emulator-tests.sh <version> ...).
+# Prose that explains the version *scheme* (e.g. "x.y.z.r means native x.y.z, binding revision r")
+# is deliberately not checked - it describes the format, not the current release.
 set -eu
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
