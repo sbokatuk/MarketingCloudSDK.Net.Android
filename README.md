@@ -14,6 +14,7 @@ dotnet add package MarketingCloudSDK.Net.Android
 
 ```csharp
 using Com.Salesforce.Marketingcloud;
+using Com.Salesforce.Marketingcloud.Sfmcsdk;
 
 var context = Android.App.Application.Context;
 var config = MarketingCloudConfig.InvokeBuilder()
@@ -23,9 +24,12 @@ var config = MarketingCloudConfig.InvokeBuilder()
     .SetMid("your-mid")
     .Build(context);
 
-// The Action overloads are this package's additions - natively both take listener interfaces.
-MarketingCloudSdk.Init(context, config, status => { });
+// Configure the container, not the module: MarketingCloudConfig is an EngagementModuleConfig,
+// and SFMCSdk.Configure is what supplies the module the components it initializes with.
+// MarketingCloudSdk.Init is the pre-Unified-SDK entry point and no longer initializes anything.
+SFMCSdk.Configure(context, new SFMCSdkModuleConfig.Builder { EngagementModuleConfig = config }.Build(), status => { });
 
+// The Action overload is this package's addition - natively RequestSdk takes a listener interface.
 MarketingCloudSdk.RequestSdk(sdk =>
     sdk.RegistrationManager.Edit().AddTag("dotnet").Commit());
 ```
