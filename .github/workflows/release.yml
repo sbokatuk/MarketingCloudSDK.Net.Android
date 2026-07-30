@@ -198,9 +198,14 @@ jobs:
 
             echo "## Packages"
             echo
-            echo "Bound against [sfmcsdk \`${native}\`](https://github.com/DataDog/sfmcsdk/releases/tag/${native}), targeting \`net8.0-android34.0\`, \`net9.0-android35.0\` and \`net10.0-android36.0\`."
+            # marketingcloudsdk, not sfmcsdk: the first three components of this repository's
+            # version are the MobilePush umbrella module's, and sfmcsdk (3.x) arrives through the
+            # SFMCSDK.Net.Android dependency. Salesforce tags its Android SDK releases MCET_<n>
+            # rather than by module version, so this links the release index, not a tag that
+            # would not resolve.
+            echo "Bound against [marketingcloudsdk \`${native}\`](https://github.com/salesforce-marketingcloud/MarketingCloudSDK-Android/releases), targeting \`net8.0-android34.0\`, \`net9.0-android35.0\` and \`net10.0-android36.0\`."
             echo
-            echo "> The first three components of \`${VERSION}\` are the sfmcsdk version; the fourth is this"
+            echo "> The first three components of \`${VERSION}\` are the marketingcloudsdk version; the fourth is this"
             echo "> repository's binding revision, which advances when the bindings or packaging change while"
             echo "> the native binaries stay put."
             echo
