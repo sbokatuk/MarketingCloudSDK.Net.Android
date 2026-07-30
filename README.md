@@ -14,6 +14,7 @@ dotnet add package MarketingCloudSDK.Net.Android
 
 ```csharp
 using Com.Salesforce.Marketingcloud;
+using Com.Salesforce.Marketingcloud.Sfmcsdk;
 
 var context = Android.App.Application.Context;
 var config = MarketingCloudConfig.InvokeBuilder()
@@ -23,9 +24,12 @@ var config = MarketingCloudConfig.InvokeBuilder()
     .SetMid("your-mid")
     .Build(context);
 
-// The Action overloads are this package's additions - natively both take listener interfaces.
-MarketingCloudSdk.Init(context, config, status => { });
+// Configure the container, not the module: MarketingCloudConfig is an EngagementModuleConfig,
+// and SFMCSdk.Configure is what supplies the module the components it initializes with.
+// MarketingCloudSdk.Init is the pre-Unified-SDK entry point and no longer initializes anything.
+SFMCSdk.Configure(context, new SFMCSdkModuleConfig.Builder { EngagementModuleConfig = config }.Build(), status => { });
 
+// The Action overload is this package's addition - natively RequestSdk takes a listener interface.
 MarketingCloudSdk.RequestSdk(sdk =>
     sdk.RegistrationManager.Edit().AddTag("dotnet").Commit());
 ```
@@ -75,7 +79,7 @@ The full roster with reasons lives in [build/packages.tsv](build/packages.tsv); 
 
 Target frameworks: `net8.0-android34.0`, `net9.0-android35.0`, `net10.0-android36.0`. The SFMC SDK's own floor is **Android 8.0 (API 26)**.
 
-> **net8 note.** `Xamarin.AndroidX.Activity` 1.12.0 — the `.pom`'s version — ships no net8 asset, so the net8 head pins 1.11.0. The net9/net10 heads carry the `.pom`-exact versions.
+> **net8 note.** `Xamarin.AndroidX.Activity` 1.12.0 — the `.pom`'s version — ships no net8 asset, so the net8 head pins 1.11.0. That revision and `Xamarin.AndroidX.Fragment.Ktx` 1.8.9 (also the last with a net8 asset) sit a generation apart, so the net8 group additionally floors `Lifecycle.ViewModelSavedState`, `Lifecycle.ViewModel.Ktx`, `Lifecycle.Runtime.Ktx` and `SavedState.SavedState.Ktx` — without them NuGet cannot resolve the graph and a net8 restore fails with `NU1107`. The net9/net10 heads carry the `.pom`-exact versions and none of the extra floors.
 
 ## Push prerequisites
 

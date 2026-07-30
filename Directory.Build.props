@@ -72,6 +72,26 @@
     <AndroidXCollectionKtxVersion>1.5.0.3</AndroidXCollectionKtxVersion>
     <AndroidXFragmentKtxVersion>1.8.9</AndroidXFragmentKtxVersion>
     <AndroidXConstraintLayoutVersion>2.2.1</AndroidXConstraintLayoutVersion>
+    <!--
+      net8-only floors, and the one place the head pays for being a head. Activity 1.11.0 and
+      Fragment.Ktx 1.8.9 are the last net8-carrying revisions of their packages, and they sit a
+      generation apart: Activity floors Lifecycle at 2.9.3 and SavedState at 1.3.2, while the
+      .Ktx facades Fragment.Ktx drags in (ViewModel.Ktx 2.9.2.1, Runtime.Ktx 2.9.2.1,
+      SavedState.Ktx 1.3.1.1) cap those same packages BELOW the floor with exact-range
+      dependencies. SFMCSDK.Net.Android's net8 head raises Lifecycle again, to 2.9.4, through
+      Work.Runtime. Disjoint ranges are not something NuGet can reconcile, so every net8
+      consumer's restore failed with NU1107 on Lifecycle.ViewModel, Lifecycle.Runtime and
+      SavedState in turn.
+
+      Flooring the facades here - at 2.9.4/1.3.3, the line all three agree on - is what makes the
+      net8 graph resolvable. Same AndroidX generation as the packages already resolve to; nothing
+      is downgraded and no new .aar enters the app. The net9/net10 heads resolve without help and
+      declare none of this.
+    -->
+    <AndroidXLifecycleViewModelSavedStateVersionNet8>2.9.4</AndroidXLifecycleViewModelSavedStateVersionNet8>
+    <AndroidXLifecycleViewModelKtxVersionNet8>2.9.4</AndroidXLifecycleViewModelKtxVersionNet8>
+    <AndroidXLifecycleRuntimeKtxVersionNet8>2.9.4</AndroidXLifecycleRuntimeKtxVersionNet8>
+    <AndroidXSavedStateKtxVersionNet8>1.3.3</AndroidXSavedStateKtxVersionNet8>
   </PropertyGroup>
 
   <PropertyGroup>

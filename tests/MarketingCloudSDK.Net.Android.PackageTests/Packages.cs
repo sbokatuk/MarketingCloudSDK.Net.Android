@@ -55,15 +55,20 @@ public static class Packages
     /// <summary>
     /// Dependencies whose version legitimately differs per target framework, and what each group
     /// must say. Lifecycle.Process 2.10.0 - the sfmcsdk .pom's version - ships no net8 asset, so
-    /// the net8 head pins the last version that does; see Directory.Build.props. Asserted here so
-    /// a merge or an edit that flattens the split back to one version fails a test instead of a
-    /// consumer's restore.
+    /// the net8 head pins the last version that does; the four AndroidX floors below exist only
+    /// on the net8 head, which is the only one whose graph needs them to resolve at all. See
+    /// Directory.Build.props. Asserted here so a merge or an edit that flattens the split back to
+    /// one version fails a test instead of a consumer's restore.
     /// </summary>
     public static readonly (string Dependency, string Tfm, string Version)[] PerTfmDependencyVersions =
     [
         ("Xamarin.AndroidX.Activity", "net8.0-android34.0", "1.11.0"),
         ("Xamarin.AndroidX.Activity", "net9.0-android35.0", "1.12.0"),
         ("Xamarin.AndroidX.Activity", "net10.0-android36.0", "1.12.0"),
+        ("Xamarin.AndroidX.Lifecycle.ViewModelSavedState", "net8.0-android34.0", "2.9.4"),
+        ("Xamarin.AndroidX.Lifecycle.ViewModel.Ktx", "net8.0-android34.0", "2.9.4"),
+        ("Xamarin.AndroidX.Lifecycle.Runtime.Ktx", "net8.0-android34.0", "2.9.4"),
+        ("Xamarin.AndroidX.SavedState.SavedState.Ktx", "net8.0-android34.0", "1.3.3"),
     ];
 
     /// <summary>xunit member data: one row per package.</summary>
