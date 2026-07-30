@@ -14,7 +14,11 @@
 # One row per module .aar this package ships: the modules version independently upstream, so a
 # drift in any of them is a repack even when marketingcloudsdk itself has not moved.
 #
-# group	label	kind	pin	locator	confirm
+#   source   owner/repo publishing the component - optional, and only meaningful on nuget
+#            rows, where the drift finding links that repository's release notes for the
+#            version it reports
+#
+# group	label	kind	pin	locator	confirm	source
 MobilePush Android	marketingcloudsdk	maven	SfmcNativeVersion	com.salesforce.marketingcloud:marketingcloudsdk:aar@https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/repository	-
 MobilePush Android	pushfeaturemodule	maven	SfmcPushFeatureVersion	com.salesforce.marketingcloud:pushfeaturemodule:aar@https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/repository	-
 MobilePush Android	pushmodelsmodule	maven	SfmcPushModelsVersion	com.salesforce.marketingcloud:pushmodelsmodule:aar@https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/repository	-
@@ -22,3 +26,9 @@ MobilePush Android	inappmessagingfeaturemodule	maven	SfmcInAppMessagingFeatureVe
 MobilePush Android	inappmessagingmodelsmodule	maven	SfmcInAppMessagingModelsVersion	com.salesforce.marketingcloud:inappmessagingmodelsmodule:aar@https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/repository	-
 MobilePush Android	common	maven	SfmcCommonVersion	com.salesforce.marketingcloud:common:aar@https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/repository	-
 MobilePush Android	legacy-crypto	maven	SfmcLegacyCryptoVersion	com.salesforce.marketingcloud:legacy-crypto:aar@https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/repository	-
+#
+# The bare SFMCSDK.Net.Android PackageReference (SfmcCorePackageVersion) is a sibling-package pin
+# like any umbrella's: a core release this repository has not re-pinned behind leaves consumers
+# resolving the older core with nothing to say so. The iOS sibling already watches its core pin;
+# this row closes the same gap here.
+SFMC SDK core	SFMCSDK.Net.Android	nuget	SfmcCorePackageVersion	SFMCSDK.Net.Android	-	sbokatuk/SFMCSDK.Net.Android
