@@ -78,6 +78,22 @@
     <PackageReference Include="Xamarin.AndroidX.Collection.Ktx" Version="$(AndroidXCollectionKtxVersion)" />
     <PackageReference Include="Xamarin.AndroidX.Fragment.Ktx" Version="$(AndroidXFragmentKtxVersion)" />
     <PackageReference Include="Xamarin.AndroidX.ConstraintLayout" Version="$(AndroidXConstraintLayoutVersion)" />
+    <!--
+      net8 only, and not because anything here calls them: they are the floors that keep the net8
+      dependency graph resolvable at all. See Directory.Build.props for what disagrees with what.
+    -->
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.ViewModelSavedState"
+                      Version="$(AndroidXLifecycleViewModelSavedStateVersionNet8)"
+                      Condition=" '$(TargetFramework)' == 'net8.0-android34.0' " />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.ViewModel.Ktx"
+                      Version="$(AndroidXLifecycleViewModelKtxVersionNet8)"
+                      Condition=" '$(TargetFramework)' == 'net8.0-android34.0' " />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Runtime.Ktx"
+                      Version="$(AndroidXLifecycleRuntimeKtxVersionNet8)"
+                      Condition=" '$(TargetFramework)' == 'net8.0-android34.0' " />
+    <PackageReference Include="Xamarin.AndroidX.SavedState.SavedState.Ktx"
+                      Version="$(AndroidXSavedStateKtxVersionNet8)"
+                      Condition=" '$(TargetFramework)' == 'net8.0-android34.0' " />
   </ItemGroup>
 
   <ItemGroup>

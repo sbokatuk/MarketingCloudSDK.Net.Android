@@ -27,6 +27,16 @@ public static class SmokeTests
             // ClassNotFoundException naming it, rather than three checks later with something
             // baffling. One marker per .aar this package ships, plus one per .aar arriving
             // through the SFMCSDK.Net.Android dependency.
+            //
+            // The three-argument overload, and the application's own loader: the one-argument
+            // Class.forName resolves against the *caller's* class loader, and a call arriving
+            // over JNI has no application frame to take one from - so every lookup goes to the
+            // boot class loader, which knows nothing about the app's dex files and fails every
+            // marker with "Class not found using the boot class loader". initialize: false
+            // because presence is the question here, not static initialization.
+            var loader = global::Android.App.Application.Context.ClassLoader
+                ?? throw new InvalidOperationException("The application context has no class loader.");
+
             foreach (var marker in new[]
             {
                 "com.salesforce.marketingcloud.MarketingCloudSdk",                    // marketingcloudsdk
@@ -40,7 +50,7 @@ public static class SmokeTests
                 "com.salesforce.marketingcloud.internal.util.PermissionUtils",        // common-internal (dependency)
             })
             {
-                Java.Lang.Class.ForName(marker);
+                Java.Lang.Class.ForName(marker, initialize: false, loader);
             }
 
             return Task.CompletedTask;
@@ -51,11 +61,15 @@ public static class SmokeTests
             var context = global::Android.App.Application.Context;
 
             // Dummy values shaped like real ones; the SDK accepts them and fails server-side,
-            // which is the isolation these checks want. The Action overload of Init is this
-            // repository's Additions code, so this check is also its end-to-end proof.
+            // which is the isolation these checks want. "Shaped like" is not cosmetic:
+            // MarketingCloudConfig.Builder.build validates the applicationId against a version-4
+            // UUID regex and requires the accessToken to be exactly 24 characters, and throws
+            // IllegalArgumentException before the SDK is ever reached otherwise. The Action
+            // overload of Init is this repository's Additions code, so this check is also its
+            // end-to-end proof.
             var config = MarketingCloudConfig.InvokeBuilder()
-                .SetApplicationId("00000000-0000-0000-0000-000000000000")
-                .SetAccessToken("devicetests-dummy-token")
+                .SetApplicationId("00000000-0000-4000-8000-000000000000")
+                .SetAccessToken("devicetests-dummy-token0")
                 .SetMarketingCloudServerUrl("https://localhost.invalid/")
                 .SetMid("000000000")
                 .Build(context);

@@ -75,7 +75,7 @@ The full roster with reasons lives in [build/packages.tsv](build/packages.tsv); 
 
 Target frameworks: `net8.0-android34.0`, `net9.0-android35.0`, `net10.0-android36.0`. The SFMC SDK's own floor is **Android 8.0 (API 26)**.
 
-> **net8 note.** `Xamarin.AndroidX.Activity` 1.12.0 — the `.pom`'s version — ships no net8 asset, so the net8 head pins 1.11.0. The net9/net10 heads carry the `.pom`-exact versions.
+> **net8 note.** `Xamarin.AndroidX.Activity` 1.12.0 — the `.pom`'s version — ships no net8 asset, so the net8 head pins 1.11.0. That revision and `Xamarin.AndroidX.Fragment.Ktx` 1.8.9 (also the last with a net8 asset) sit a generation apart, so the net8 group additionally floors `Lifecycle.ViewModelSavedState`, `Lifecycle.ViewModel.Ktx`, `Lifecycle.Runtime.Ktx` and `SavedState.SavedState.Ktx` — without them NuGet cannot resolve the graph and a net8 restore fails with `NU1107`. The net9/net10 heads carry the `.pom`-exact versions and none of the extra floors.
 
 ## Push prerequisites
 
