@@ -2,8 +2,10 @@ name: upstream watch
 
 # Watches Salesforce's Maven repository for movement this repository has not reacted to:
 #
-#   - an sfmcsdk release newer than the SfmcNativeVersion the package binds, read from
-#     sfmcsdk's maven-metadata.xml;
+#   - a marketingcloudsdk release newer than the SfmcNativeVersion the package binds, read
+#     from marketingcloudsdk's maven-metadata.xml. This workflow watches marketingcloudsdk and
+#     nothing else; the core module, sfmcsdk, is watched by the sibling SFMCSDK.Net.Android
+#     repository, which is where this package's dependency on it comes from;
 #   - artifacts in the com/salesforce/marketingcloud listing that are neither bound in
 #     build/packages.tsv nor listed in its reasoned NOT BOUND roster - the "is X missing on
 #     purpose?" question, asked by a robot before a consumer asks it in an issue.
@@ -41,10 +43,22 @@ jobs:
         id: compare
         run: |
           bound=$(sed -n 's:.*<SfmcNativeVersion>\(.*\)</SfmcNativeVersion>.*:\1:p' Directory.Build.props | head -1)
-          latest=$(curl -fsSL "${SFMC_REPO}/sfmcsdk/maven-metadata.xml" \
-            | sed -n 's:.*<latest>\(.*\)</latest>.*:\1:p' | head -1)
+          # Salesforce hand-rolls these metadata files, inconsistently between artifacts:
+          # sfmcsdk's carries <latest>, marketingcloudsdk's does not (a stray bare <version>
+          # under <versioning> and an *unordered* <versions> list instead). Resolve the way
+          # build/check-upstream.sh's discover_maven does - every <version> tag, releases only,
+          # highest by version sort - which reads both shapes and needs no <latest> at all.
+          #
+          # The grep is braced with `|| true` for the same reason check-upstream.sh's
+          # clean_versions ends that way: metadata carrying no plain release version must leave
+          # `latest` empty for the explicit check below to report, not kill the step from inside
+          # a pipeline. Harmless under the default `bash -e` shell, load-bearing the moment
+          # anyone sets `shell: bash`, which adds pipefail.
+          latest=$(curl -fsSL "${SFMC_REPO}/marketingcloudsdk/maven-metadata.xml" \
+            | sed -n 's:.*<version>\([^<]*\)</version>.*:\1:p' \
+            | { grep -E '^[0-9]+(\.[0-9]+)*$' || true; } | sort -V | tail -1)
           if [ -z "${bound}" ] || [ -z "${latest}" ]; then
-            echo "::error::could not resolve the bound (${bound:-?}) or latest (${latest:-?}) sfmcsdk version"
+            echo "::error::could not resolve the bound (${bound:-?}) or latest (${latest:-?}) marketingcloudsdk version"
             exit 1
           fi
           echo "bound=${bound}"   >> "$GITHUB_OUTPUT"
@@ -84,7 +98,7 @@ jobs:
 
           if [ "${LATEST}" != "${BOUND}" ]; then
             cat > version-issue.md <<EOF
-          Salesforce's \`maven-metadata.xml\` for \`sfmcsdk\` reports \`${LATEST}\` as the latest release; this repository binds \`${BOUND}\`.
+          Salesforce's \`maven-metadata.xml\` for \`marketingcloudsdk\` reports \`${LATEST}\` as the latest release; this repository binds \`${BOUND}\`.
 
           Upstream release notes: https://github.com/salesforce-marketingcloud/MarketingCloudSDK-Android/releases
 
@@ -92,7 +106,7 @@ jobs:
 
           *Filed automatically by the upstream-watch workflow; it will not re-file while this issue stays open.*
           EOF
-            file_issue "sfmcsdk ${LATEST} is out (bound: ${BOUND})" version-issue.md
+            file_issue "marketingcloudsdk ${LATEST} is out (bound: ${BOUND})" version-issue.md
           else
             echo "version: the repository's latest (${LATEST}) is what is bound"
           fi
@@ -104,7 +118,7 @@ jobs:
               echo
               sed 's/^/- `/; s/$/`/' unaccounted.txt
               echo
-              echo "Each one wants a decision: bind it (a row in \`build/packages.tsv\` plus a project under \`src/\`), hand it to the sibling MarketingCloudSDK.Net.Android repository, or add it to the roster with the reason it stays unbound."
+              echo "Each one wants a decision: bind it (a row in \`build/packages.tsv\` plus a project under \`src/\`), hand it to the sibling SFMCSDK.Net.Android repository, or add it to the roster with the reason it stays unbound."
               echo
               echo "*Filed automatically by the upstream-watch workflow; it will not re-file while an issue with this exact title stays open.*"
             } > roster-issue.md
