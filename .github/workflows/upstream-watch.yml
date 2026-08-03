@@ -3,8 +3,9 @@ name: upstream watch
 # Watches Salesforce's Maven repository for movement this repository has not reacted to:
 #
 #   - a marketingcloudsdk release newer than the SfmcNativeVersion the package binds, read
-#     from marketingcloudsdk's maven-metadata.xml (sfmcsdk, the core module, is the sibling
-#     SFMCSDK.Net.Android repository's to watch);
+#     from marketingcloudsdk's maven-metadata.xml. This workflow watches marketingcloudsdk and
+#     nothing else; the core module, sfmcsdk, is watched by the sibling SFMCSDK.Net.Android
+#     repository, which is where this package's dependency on it comes from;
 #   - artifacts in the com/salesforce/marketingcloud listing that are neither bound in
 #     build/packages.tsv nor listed in its reasoned NOT BOUND roster - the "is X missing on
 #     purpose?" question, asked by a robot before a consumer asks it in an issue.
@@ -47,9 +48,15 @@ jobs:
           # under <versioning> and an *unordered* <versions> list instead). Resolve the way
           # build/check-upstream.sh's discover_maven does - every <version> tag, releases only,
           # highest by version sort - which reads both shapes and needs no <latest> at all.
+          #
+          # The grep is braced with `|| true` for the same reason check-upstream.sh's
+          # clean_versions ends that way: metadata carrying no plain release version must leave
+          # `latest` empty for the explicit check below to report, not kill the step from inside
+          # a pipeline. Harmless under the default `bash -e` shell, load-bearing the moment
+          # anyone sets `shell: bash`, which adds pipefail.
           latest=$(curl -fsSL "${SFMC_REPO}/marketingcloudsdk/maven-metadata.xml" \
             | sed -n 's:.*<version>\([^<]*\)</version>.*:\1:p' \
-            | grep -E '^[0-9]+(\.[0-9]+)*$' | sort -V | tail -1)
+            | { grep -E '^[0-9]+(\.[0-9]+)*$' || true; } | sort -V | tail -1)
           if [ -z "${bound}" ] || [ -z "${latest}" ]; then
             echo "::error::could not resolve the bound (${bound:-?}) or latest (${latest:-?}) marketingcloudsdk version"
             exit 1
